@@ -1,6 +1,8 @@
 {
-  "cleanUrls": true,
+  "framework": null,
+  "buildCommand": "node build.mjs",
+  "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/", "destination": "/dist/command-centre-v2.html" }
+    { "source": "/(.*)", "destination": "/command-centre-v2.html" }
   ]
 }
