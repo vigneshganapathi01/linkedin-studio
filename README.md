@@ -2,6 +2,11 @@
 
 A 3D isometric office where a team of AI agents runs LinkedIn personalization for your clients — on your own Claude login.
 
+![LinkedIn Studio — six pods (Profile, Research, Content, Engagement, Analytics, Clients) around the Brain, dark theme](assets/linkedin-studio-hero.png)
+
+**Live demo:** https://linkedin-studio-git-main-vignesh-gs-projects.vercel.app
+_(the deployed build runs the office UI in demo mode — real agent tasks run locally; see [Install](#install))_
+
 Six departments, thirty-five agents at their desks, a task bar that routes what you type to the right agent, and a Brain at the centre that is your own folder of notes. A client shares their LinkedIn profile; the office audits it, learns their voice, researches their domain, writes and repurposes posts, drafts comments and replies, tracks what works, and files every deliverable back into your notes. Nothing goes out without your OK. Everything runs on your machine.
 
 Built on the [linkedin-skills](https://github.com/sergebulaev/linkedin-skills) toolkit, adapted to the office's read-freely / approve-before-publish model.
@@ -73,6 +78,16 @@ Every outbound action — a post, comment, reply, or DM — is prepared as a **d
 ## Routines
 
 Tasks on the office's own clock — "every weekday at 8am, scan the client's domain". This release supports routines for the **Profile, Analytics and Research** pods. Type one with a time in it, or press **REPEAT** / the calendar (**P**).
+
+## Screenshots
+
+The task feed — LinkedIn work routed to the right agent, per client:
+
+![Task panel](assets/linkedin-studio-tasks.png)
+
+A department in focus (Content pod):
+
+![Content pod in focus](assets/linkedin-studio-pod.png)
 
 ## Credits
 
