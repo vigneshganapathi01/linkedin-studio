@@ -19,7 +19,7 @@ import path from 'node:path';
 import { describe, nextRun, valid } from './src/when.js';
 
 export const ALLOWED = ['emails', 'fin', 'sales'];
-export const NAMES = { emails: 'Emails', fin: 'Accounting', sales: 'Sales', marketing: 'Marketing', ops: 'Operations', delivery: 'Delivery' };
+export const NAMES = { emails: 'Profile', fin: 'Analytics', sales: 'Research', marketing: 'Content', ops: 'Engagement', delivery: 'Clients' };
 export const file = brainPath => path.join(brainPath, 'Agents Office', 'routines.json');
 export const stateFile = dataDir => path.join(dataDir, 'routines.json');
 export const LATE_AFTER = 90 * 1000; // a run more than 90 s past its minute was missed (asleep, or the office was off) → runs once, marked LATE
@@ -29,7 +29,7 @@ const readJSON = (p, fallback) => { try { return JSON.parse(fs.readFileSync(p, '
 
 /** "Routines come to Marketing in a later release. This release: Emails, Accounting, Sales." */
 export function refusal(dept) {
-  return `Routines come to ${NAMES[dept] || dept} in a later release. This release: Emails, Accounting and Sales.`;
+  return `Routines come to ${NAMES[dept] || dept} in a later release. This release: ${NAMES.emails}, ${NAMES.fin} and ${NAMES.sales}.`;
 }
 
 /** Normalise + check one routine against the roster. Returns { routine, problems }. Fixed fields are kept as given; bad ones are named. */

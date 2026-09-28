@@ -27,88 +27,87 @@ import { parseWhen, describe, nextRun, fromPicker, untilText } from './when.js';
 import { initCalendar } from './calendar.js'; // V3.2.1 (16 Sep 2026): the calendar on P
 import { MODEL_KEYS, MODELS, DEFAULT_MODEL, modelName, normModel, FROM_TEXT , EFFORT_KEYS, EFFORT_NAME, normEffort, effortName, effortFor } from './models.js';
 
-const SEGMENTS = ['roofing', 'HVAC', 'dental', 'logistics', 'fitness', 'property', 'landscaping', 'legal'];
+const SEGMENTS = ['B2B SaaS', 'fintech', 'AI', 'healthtech', 'agency', 'ecommerce', 'consulting', 'cybersecurity'];
 
-// generic-business task pool per agent (AJ: generic business, not TerriTool-flavoured)
+// LinkedIn-agency task pool per agent (each client is a {co}; {segment} is their niche)
 const POOL = {
-  elead: ['Review the overnight inbox, route 40 emails', 'Tone pass on 6 client replies', 'Weekly inbox summary for AJ', 'Update the reply templates', 'Escalate 2 threads to AJ'],
-  cmail: ['Reply to the {co} scope question', 'Send the kickoff summary to {co}', 'Answer 9 client emails from overnight', 'Draft the price-increase notice', 'Chase {co} for the brief sign-off'],
-  imail: ['Triage 14 internal emails', 'Circulate the weekly numbers', 'Reply to the team about the Q3 plan', 'Summarise the 40-message thread', 'Book the client review in the calendar'],
-  vmail: ['Summarise the vendor SLA revision', 'Reply to the SMS provider about the plan tier', 'Request a quote from the print vendor', 'Chase the hosting vendor on the outage report', 'Confirm the vendor renewal date'],
-  kmail: ['Answer the designer’s invoice query', 'Send the brief to the copywriter', 'Confirm the contractor’s hours for the week', 'Chase the developer for the estimate', 'Reply to the video contractor about the deadline'],
-  lexi:  ['Review overnight enrichment before the reps see it', "Build today's call lists", 'Chase {n} deals quiet past 14 days', 'Prep the weekly pipeline review', 'Tighten the ICP with Prospector'],
-  enzo:  ['Enrich {n} overnight signups', 'Verify mobiles on the AU batch', 'Backfill company size on 12 leads', 'Score the morning batch for the Sales Lead', 'Re-run 3 failed enrichments'],
-  ilm:   ['Qualify {n} inbound leads from the website', 'Route 6 hot leads to the reps', 'Reply to {co} within the hour', 'Book a discovery call with {co}', 'Clean the inbound queue, 12 duplicates'],
-  pros:  ['Mine {n} {segment} companies for outbound', 'Score 40 prospects against the ICP', "Build tomorrow's cold-call list", 'Cross-check new finds against customers', 'Verify mobiles on the new batch'],
-  piper: ['Proposal for the 40-seat prospect', 'Update the Growth-plan proposal template', 'Pricing options for {co}', 'Proposal follow-up pack for {co}', 'Sign-online link for the {co} proposal'],
-  folo:  ['Follow up {n} quotes sent last week', 'Re-engage 8 cold leads', 'Log call outcomes into the CRM', 'Send the 14-day nudge to quiet deals', 'Book a demo for {co}'],
-  mlead: ["Review the week's content before it ships", 'Shift $50/day into the winning ad', 'Set next week’s reel line-up', 'Weekly marketing summary for AJ', 'Brief Research on the {segment} angle'],
-  riley: ['Morning scan: 49 sources', 'Weekly competitor pricing scan', 'Pull 3 stats for the newsletter', 'Trend brief for the Sales Lead', 'Read 6 buyer reviews for angles'],
-  newt:  ['Draft the September newsletter', 'A/B subject lines for issue 32', 'Log issue 31 numbers', 'Rebuild the welcome sequence, email 2', 'Clean 40 bounced subscribers'],
-  gfx:   ['Quote-card set for the pricing page', 'Story + square exports, brand kit', 'Thumbnail for the "10am rule" reel', 'Carousel cover, 3 options', 'Resize the ad creative to 4:5'],
-  ada:   ['Refresh the fatigued ad set', 'Launch 4 variants of "cold call anxiety"', 'Pull the daily spend report', 'Shift $50/day into the winner', 'Exclude existing customers from targeting'],
-  iggy:  ['Write the hook for the carousel', 'Log hook performance to the playbook', 'Schedule 3 posts for the week', 'Reply to 14 DMs', 'Cut the caption on the "10am rule" reel'],
-  vid:   ['Render the "10am rule" reel, captions on', 'Cut a 15 s teaser from the demo', 'Re-render ad variants in 4:5', 'Caption pass on the webinar clip', 'Colour + captions on the founder reel', 'Render the 45 s demo cut'],
-  olead: ["Review the week's contracts and flags", 'Chase {n} open vendor renewals', 'Prioritise Intel’s findings', 'Weekly operations summary for AJ', 'Prep the board pack sections'],
-  scout: ['Competitor pricing page diff', 'G2 review scan for the top 3 rivals', 'Opportunity memo: rival price rise', 'Market map refresh, Q3', 'Watch the rival launch page'],
-  legal: ['Review the amended MSA, 2 clauses', 'Contractor agreement for the designer', 'Privacy policy annual check', 'Redline the {co} terms', 'Check the price-lock clause'],
-  comply:['AU regulation page changed, diffing', 'Consent wording audit on the forms', 'Data retention check, 3 systems', 'Quarterly compliance checklist', 'Cookie banner review'],
-  report:['Weekly board pack, 6 sections', 'Monthly KPI roll-up', 'Churn cohort report for the Brain', 'Delivery SLA report', 'Rep activity summary'],
-  dash:  ['Refresh the sales dashboard', 'Add the delivery on-track tile', 'Fix the revenue chart, wrong period', 'Build the inbox response-time view', 'Weekly dashboard health check'],
-  alead: ["Review the week's cash position", 'Approve the contractor payment run', 'Prep the month-end pack', 'Vendor rate review', 'Cash forecast, next 8 weeks'],
-  invo:  ['Issue {n} invoices for the week', 'Chase 3 overdue invoices', 'Credit note for {co}', 'Invoice {co} $840', 'Reminder 2 of 3 to {co}'],
-  apay:  ["Match today's card charges", 'Audit contractor invoice #218 vs contract', 'Schedule the contractor payments', 'Flag a subscription overlap', 'Check the SMS provider plan tier'],
-  recon: ['Reconcile 14 payments, 2 flagged', 'Month-end bank reconciliation', 'Match Stripe payouts to invoices', 'Clear 2 unmatched fees', 'Tie out the card statement'],
-  dlead: ['Review 12 live projects for risk', 'Weekly delivery summary for AJ', 'Re-plan the {co} timeline', 'Approve the {co} handover', 'Staff the {co} project'],
-  pco:   ['Update the {co} project plan', 'Move 3 milestones after the scope change', 'Chase 2 overdue client sign-offs', 'Schedule the {co} review', 'Log this week’s hours per project'],
-  qa:    ['QA the {co} website handover', 'Check the {co} report pack for errors', 'Test the client portal login flow', 'Proof the asset set, brand rules', 'Regression pass on the booking form'],
-  crep:  ['September status report for {co}', 'Monthly report pack, 14 clients', 'Add the results section to the {co} report', 'Send the {co} report, 2 flags', 'Chart the {co} lead numbers'],
-  cass:  ['Sync the {co} assets to the portal', 'Organise the {co} asset library', 'Export the logo set, 4 formats', 'Archive the finished {co} files', 'Tag 60 assets by campaign'],
-  dasst: ['Draft the {co} social templates', 'Resize the {co} banners, 6 sizes', 'Mock up the {co} landing page', 'Prepare the {co} brand sheet', 'Design the {co} report cover'],
-  ona:   ['Kickoff call prep for {co}', 'Onboarding checklist for {co}', 'Set up the {co} client portal', 'Walk {co} through the first report', 'Day-7 check-in with {co}'],
+  elead: ['Onboard {co}: run the full profile audit', 'Write the client brief for {co}', 'Route the voice read and story interview for {co}', 'Weekly profile-progress summary for the owner', 'Kick off the {co} audit from the shared profile'],
+  cmail: ['Audit {co}’s LinkedIn profile, 9 components', 'Rewrite {co}’s headline, 3 options', 'Fix the About section for {co}', 'Score {co}’s Featured and banner', 'Rewrite {co}’s Experience with metrics'],
+  imail: ['Build the voice profile for {co}', 'Read {co}’s last 20 posts for tone', 'Write {co}’s do-not-say list', 'Update {co}’s voice rules', 'Extract {co}’s favourite phrases'],
+  vmail: ['Interview {co} for the Story Bank', 'Turn {co}’s topic into a post spine', 'Log 5 new stories for {co}', 'Chase {co} for one concrete number', 'Refresh {co}’s Story Bank'],
+  kmail: ['Capture {co}’s goals and offer', 'Record {co}’s topics to avoid', 'Confirm {co}’s posting cadence', 'Fold {co}’s red lines into the brief', 'Set up {co}’s client brief note'],
+  lexi:  ['Assign this week’s topics for {co}', 'Rank the angles for {co}', 'Brief Content on the {segment} angle', 'Set the daily domain scan for {co}', 'Weekly research summary for the owner'],
+  enzo:  ['Scan {co}’s domain, {n} sources', 'Surface 5 stories for {co}’s audience', 'Morning news brief for {co}', 'Find a news peg for the {segment} post', 'Log today’s finds to the Brain'],
+  ilm:   ['Track trending {segment} topics', 'Spot the format winning this week', 'Flag a rising conversation for {co}', 'Trend brief for the Research Lead', 'Watch the {segment} hashtag'],
+  pros:  ['Reverse-engineer a viral {segment} hook', 'Study {co}’s top voices, 5 posts', 'Map the hook formula to {co}’s topic', 'Update the voices-to-watch list', 'Break down why the rival post worked'],
+  piper: ['Collect sources for the {co} post', 'Pull 3 stats for the {segment} angle', 'Verify the quote for {co}', 'File this week’s sources for {co}', 'Find a primary source for the claim'],
+  folo:  ['Resurface older research for {co}', 'Flag a fresh peg on a past topic', 'Update {co}’s watch list', 'Connect today’s news to the backlog', 'Weekly signal sweep for {co}'],
+  mlead: ['Plan {co}’s week, 3-pillar', 'Assign hooks and formats for {co}', 'Sign off {co}’s drafts before QA', 'Weekly content summary for the owner', 'Brief the writers on the {segment} angle'],
+  riley: ['Extract insight cards from the {segment} report', 'Turn the source into 5 takeaways', 'Pull the number and the quote for {co}', 'Card the long-form for the writers', 'Log insight cards for {co}'],
+  newt:  ['Write 5 hooks for the {co} post', 'Hook options for the {segment} angle', 'Log hook performance to the playbook', 'Rewrite the flat hook for {co}', 'Match hooks to {co}’s voice'],
+  gfx:   ['Design the {co} carousel, 8 slides', 'Cover options for the {co} post, 3', 'Image post for {co} on brand kit', 'Resize the carousel for {co}', 'Slide-one hook art for {co}'],
+  ada:   ['Write the {co} post from the hook', 'Draft 3 posts for {co}’s week', 'Humanize the {co} draft', 'Post in {co}’s voice on the {segment} angle', 'Move the link to the first comment'],
+  iggy:  ['Repurpose {co}’s webinar into a post', 'Turn the thread into a LinkedIn post', 'Rebuild the blog for LinkedIn', 'Repurpose one idea into 3 formats', 'Re-hook the newsletter for {co}'],
+  vid:   ['Script the {co} short video', '3-second hook for the {co} clip', 'Turn the post into a video script', 'On-screen text cues for {co}', 'Script the founder reel for {co}'],
+  olead: ['Set {co}’s engagement targets', 'Review the comment and reply drafts', 'Weekly engagement summary for the owner', 'Prioritise the accounts for {co}', 'Approve {co}’s reply sweep'],
+  scout: ['Draft comments on 5 {segment} posts', 'First-comment draft for {co}', '3 comment variants for the viral post', 'Reshare with commentary for {co}', 'Comment on {co}’s target accounts'],
+  legal: ['Sweep {co}’s post, draft every reply', 'Reply to the comment on {co}’s post', 'Follow the author reply for {co}', 'Clear the comments on {co}’s post', 'Draft replies for {co}, 12 comments'],
+  comply:['Check {co}’s drafts against red lines', 'Brand-safety pass on the {segment} post', 'Flag anything off-voice for {co}', 'LinkedIn rules check on the reply sweep', 'Verify the claims in the {co} post'],
+  report:['Weekly engagement report for {co}', 'Tie replies to conversations for {co}', 'Log the new inbound for {co}', 'Engagement roll-up, all clients', 'Report the week’s comments for {co}'],
+  dash:  ['Refresh {co}’s engagement queue', 'Surface pending replies for {co}', 'Add the target-accounts tile', 'Fix the queue count, wrong period', 'Daily engagement health check'],
+  alead: ['Review {co}’s numbers this week', 'Say what to double down on for {co}', 'Set {co}’s cadence from the data', 'Weekly analytics summary for the owner', 'Recommend the next move for {co}'],
+  invo:  ['Pull the engagers on {co}’s post', 'Segment {co}’s engagers by ICP', 'Build the outbound list for {co}', 'Roster the likers on the viral post', 'One-line openers for {co}’s prospects'],
+  apay:  ['Check which comments got author replies', 'Flag {co}’s warm threads', 'Route warm threads to the Reply Handler', 'Classify {co}’s threads hot/warm/cool', 'Monitor {co}’s recent comments'],
+  recon: ['Schedule {co}’s posts for the week', 'Fill the gaps in {co}’s calendar', 'Match the numbers to {co}’s posts', 'Clear 2 unmatched metrics', 'Best-time check for {co}'],
+  dlead: ['Review {n} live clients for risk', 'Weekly client summary for the owner', 'Re-plan the {co} cadence', 'Stand up advocacy for {co}’s team', 'Approve the {co} handover'],
+  pco:   ['Update the {co} content calendar', 'Chase 2 overdue client sign-offs', 'Move the {co} posts after the change', 'Schedule the {co} review', 'Log this week’s posts for {co}'],
+  qa:    ['QA the {co} post, humanizer audit', 'Check {co}’s draft against voice', 'Verify links and stats for {co}', 'Proof the {co} carousel', 'Final pass on {co}’s reply sweep'],
+  crep:  ['September results report for {co}', 'Monthly report pack, {n} clients', 'Add the growth section to {co}’s report', 'Send the {co} report, 2 flags', 'Chart {co}’s follower growth'],
+  cass:  ['Sync {co}’s approved posts to the folder', 'Organise {co}’s asset library', 'Export the {co} carousel set', 'Archive {co}’s finished posts', 'Name and file 60 assets for {co}'],
+  dasst: ['Resize {co}’s carousel, 3 sizes', 'Build the {co} template set', 'Mock up the {co} banner', 'Refresh {co}’s brand sheet', 'Design the {co} report cover'],
+  ona:   ['Collect {co}’s profile and goals', 'Onboarding checklist for {co}', 'Gather {co}’s brand kit', 'Hand {co}’s starter pack to Profile', 'Day-7 check-in with {co}'],
 };
 
 // keywords that route a typed task to the right agent inside the chosen department
 const KEYS = {
-  elead: ['summary', 'template', 'escalate', 'inbox'], cmail: ['client', 'customer', 'reply', 'scope', 'kickoff'],
-  imail: ['team', 'internal', 'staff', 'calendar', 'thread'], vmail: ['vendor', 'supplier', 'sla', 'renewal', 'quote'],
-  kmail: ['contractor', 'freelance', 'designer', 'developer', 'copywriter'],
-  lexi: ['pipeline', 'call list', 'rep', 'review', 'deal'], enzo: ['enrich', 'signup', 'verify', 'data'],
-  ilm: ['inbound', 'qualify', 'route', 'website lead', 'discovery'], pros: ['prospect', 'list', 'mine', 'find', 'companies', 'icp'],
-  piper: ['proposal', 'pricing', 'seat', 'quote'], folo: ['follow', 'chase', 'nudge', 'demo'],
-  mlead: ['content plan', 'calendar', 'budget', 'marketing summary', 'line-up'], riley: ['research', 'scan', 'trend', 'stat', 'source'], newt: ['newsletter', 'issue', 'subscriber', 'welcome'],
-  gfx: ['design', 'graphic', 'thumbnail', 'image', 'creative', 'banner', 'card', 'cover'], ada: ['ad', 'ads', 'meta', 'campaign', 'spend', 'budget', 'variant'],
-  iggy: ['instagram', 'post', 'hook', 'dm', 'story', 'carousel', 'schedule'], vid: ['video', 'reel', 'cut', 'render', 'edit', 'caption', 'clip', 'footage', 'teaser'],
-  olead: ['renewal', 'escalate', 'board pack', 'operations summary', 'checklist'], scout: ['intel', 'competitor', 'rival', 'market', 'memo'], legal: ['contract', 'msa', 'terms', 'legal', 'clause', 'agreement'],
-  comply: ['compliance', 'regulation', 'consent', 'privacy', 'retention', 'cookie'], report: ['report', 'kpi', 'board pack', 'roll-up', 'summary'],
-  dash: ['dashboard', 'chart', 'tile', 'metric', 'view'],
-  alead: ['cash', 'vendor', 'forecast', 'month-end', 'approve'], invo: ['invoice', 'overdue', 'credit note'],
-  apay: ['bill', 'pay', 'payable', 'charge', 'contractor', 'subscription'], recon: ['reconcile', 'bank', 'stripe', 'match', 'statement'],
-  dlead: ['risk', 'timeline', 'handover', 'staff', 'summary'], pco: ['plan', 'milestone', 'schedule', 'sign-off', 'hours'],
-  qa: ['qa', 'test', 'check', 'proof', 'bug', 'regression'], crep: ['report', 'status', 'results', 'monthly'],
-  cass: ['asset', 'file', 'portal', 'library', 'export', 'logo'], dasst: ['design', 'mock', 'template', 'banner', 'brand sheet', 'resize'],
-  ona: ['onboard', 'kickoff', 'checklist', 'welcome'],
+  elead: ['brief', 'onboard', 'audit', 'summary', 'profile lead'], cmail: ['profile', 'headline', 'about', 'banner', 'optimize', 'bio'],
+  imail: ['voice', 'tone', 'voice profile', 'humanize', 'style'], vmail: ['story', 'interview', 'story bank', 'material', 'spine'],
+  kmail: ['goals', 'offer', 'intake', 'cadence', 'red lines'],
+  lexi: ['research plan', 'topics', 'angles', 'scan', 'research summary'], enzo: ['news', 'sources', 'domain', 'peg', 'scout'],
+  ilm: ['trend', 'trending', 'format', 'hashtag', 'conversation'], pros: ['hook', 'viral', 'formula', 'study', 'competitor', 'creator'],
+  piper: ['source', 'stat', 'quote', 'data', 'reference'], folo: ['resurface', 'signal', 'watch', 'peg', 'monitor topic'],
+  mlead: ['content plan', 'calendar', 'plan the week', 'pillar', 'line-up'], riley: ['extract', 'insight', 'takeaway', 'card', 'facts'], newt: ['hook', 'opening line', 'hook options'],
+  gfx: ['carousel', 'graphic', 'slide', 'image', 'cover', 'banner'], ada: ['post', 'write', 'draft', 'write post', 'copy'],
+  iggy: ['repurpose', 'thread', 'blog', 'newsletter', 'reformat'], vid: ['video', 'reel', 'script', 'clip', 'short', 'caption'],
+  olead: ['engagement', 'targets', 'engage', 'review replies', 'summary'], scout: ['comment', 'first comment', 'reshare', 'engage post'], legal: ['reply', 'replies', 'thread sweep', 'answer comment'],
+  comply: ['brand safety', 'red lines', 'compliance', 'check', 'verify'], report: ['engagement report', 'inbound', 'conversations', 'roll-up', 'summary'],
+  dash: ['queue', 'dashboard', 'pending', 'tile', 'view'],
+  alead: ['analytics', 'numbers', 'recommend', 'cadence', 'review'], invo: ['engager', 'likers', 'icp', 'segment', 'outbound list'],
+  apay: ['thread', 'author reply', 'warm', 'monitor', 'follow-up'], recon: ['schedule', 'cadence', 'best time', 'reconcile', 'match'],
+  dlead: ['risk', 'advocacy', 'handover', 'client', 'summary'], pco: ['plan', 'milestone', 'schedule', 'sign-off', 'posts'],
+  qa: ['qa', 'audit', 'humanize', 'proof', 'check', 'voice'], crep: ['report', 'status', 'results', 'monthly'],
+  cass: ['asset', 'file', 'folder', 'library', 'export', 'logo'], dasst: ['design', 'mock', 'template', 'banner', 'brand sheet', 'resize'],
+  ona: ['onboard', 'kickoff', 'checklist', 'welcome', 'collect'],
 };
 
 // handoff chains — one piece of work passing desk to desk (the multi-agent story)
 const CHAINS = [
-  [['mlead', 'Set next week’s reel line-up'], ['riley', 'Research angles for the line-up'], ['iggy', 'Write the hooks for the line-up']],
-  [['legal', 'Review the amended {co} MSA'], ['olead', 'Decide on the {co} clause, escalate if needed']],
-  [['riley', 'Research hook angles for the next reel'], ['iggy', 'Write the reel script from the research'], ['vid', 'Cut and render the reel, captions on']],
-  [['gfx', 'Creative for the new {segment} ad set'], ['ada', 'Launch the {segment} ad set, 4 variants']],
-  [['pros', 'Build a {segment} prospect list'], ['ilm', 'Qualify the {segment} list, route the hot ones'], ['lexi', 'Review the routed leads with the reps']],
-  [['enzo', 'Enrich the overnight signups'], ['ilm', 'Route the enriched batch to the reps']],
-  [['ilm', 'Qualified lead: {co} wants a quote'], ['piper', 'Proposal for {co}'], ['legal', 'Check the {co} terms']],
-  [['piper', 'Proposal accepted by {co}'], ['ona', 'Onboard {co}: kickoff call'], ['pco', 'Set up the {co} project plan']],
-  [['cmail', 'Scope change request from {co}'], ['pco', 'Re-plan the {co} milestones'], ['crep', 'Update the {co} status report']],
-  [['dasst', 'Draft the {co} asset set'], ['qa', 'QA the {co} asset set'], ['cass', 'Publish the {co} assets to the portal']],
-  [['scout', 'Rival pricing change detected, memo'], ['piper', 'Update the proposal pricing table']],
-  [['invo', "Issue this week's invoices"], ['recon', 'Match payments to the new invoices']],
-  [['report', 'Monthly KPI roll-up'], ['dash', 'Refresh the KPI dashboard'], ['alead', 'Fold the KPIs into the month-end pack']],
-  [['vmail', 'Vendor quote received for {co}'], ['apay', 'Check the vendor quote against budget']],
-  [['kmail', 'Contractor invoice query from the designer'], ['apay', 'Audit the contractor invoice vs contract']],
-  [['imail', 'Team asks for the Q3 numbers'], ['dash', 'Refresh the Q3 dashboard']],
-  [['crep', 'September report ready for {co}'], ['cmail', 'Send the {co} report with a summary']],
+  [['elead', 'Onboard {co}: run the profile audit'], ['cmail', 'Audit {co}’s profile, 9 components'], ['imail', 'Build {co}’s voice profile']],
+  [['ona', 'Collect {co}’s profile and goals'], ['elead', 'Start the {co} audit from the starter pack']],
+  [['cmail', '{co}’s profile audit done'], ['kmail', 'Capture {co}’s goals and offer'], ['lexi', 'Set {co}’s research topics']],
+  [['lexi', 'Assign this week’s topics for {co}'], ['enzo', 'Scan {co}’s domain for stories'], ['pros', 'Study the viral {segment} hooks']],
+  [['enzo', 'Surface 5 stories for {co}'], ['riley', 'Extract insight cards from the stories'], ['newt', 'Write hooks from the insights']],
+  [['newt', 'Write 5 hooks for the {co} post'], ['ada', 'Write the {co} post from the hook'], ['qa', 'QA the {co} post, humanizer audit']],
+  [['ada', 'Draft this week’s posts for {co}'], ['gfx', 'Design the {co} carousel'], ['cass', 'File {co}’s approved posts']],
+  [['iggy', 'Repurpose {co}’s webinar into a post'], ['qa', 'QA the repurposed post'], ['recon', 'Schedule the {co} post']],
+  [['ada', '{co}’s post is live'], ['scout', 'Draft comments on the {segment} posts'], ['legal', 'Sweep {co}’s post, draft replies']],
+  [['invo', 'Pull the engagers on {co}’s post'], ['apay', 'Flag {co}’s warm threads'], ['legal', 'Draft follow-up replies for {co}']],
+  [['apay', 'Warm thread on {co}’s comment'], ['legal', 'Draft the follow-up reply']],
+  [['scout', 'Draft comments for {co}'], ['comply', 'Brand-safety pass on the comments']],
+  [['mlead', 'Plan {co}’s week'], ['newt', 'Write the hooks for the plan'], ['ada', 'Write the posts from the hooks']],
+  [['alead', 'Review {co}’s numbers'], ['crep', 'Write the {co} results report'], ['dlead', 'Fold results into the client review']],
+  [['dlead', 'Stand up advocacy for {co}’s team'], ['ona', 'Onboard the {co} teammates'], ['mlead', 'Plan the team’s content']],
+  [['comply', 'Flagged an off-voice reply for {co}'], ['legal', 'Rewrite the reply in {co}’s voice']],
 ];
 
 applyTasks({ POOL, KEYS, CHAINS, SEGMENTS, AGENTS }); // INDUSTRY PROFILE (12 Sep 2026): per-industry demo file; no-op otherwise
@@ -141,8 +140,8 @@ export function initTasks(ctx) {
   // V3.5 routines. Live: the server's list (polled). Demo: session-only, fired by this tick.
   const routines = []; let rseq = 1, polling = false, railAgent = null, railExp = false;
   const RT_DEPTS = ['emails', 'fin', 'sales'];
-  const RT_NAMES = PROFILE ? Object.fromEntries(Object.entries(PROFILE.pods).map(([k, v]) => [k, titleCase(v)])) : { emails: 'Emails', fin: 'Accounting', sales: 'Sales', marketing: 'Marketing', ops: 'Operations', delivery: 'Delivery' };
-  const rtRefuse = k => `Routines come to ${RT_NAMES[k] || k} in a later release. This release: Emails, Accounting and Sales.`;
+  const RT_NAMES = PROFILE ? Object.fromEntries(Object.entries(PROFILE.pods).map(([k, v]) => [k, titleCase(v)])) : { emails: 'Profile', fin: 'Analytics', sales: 'Research', marketing: 'Content', ops: 'Engagement', delivery: 'Clients' };
+  const rtRefuse = k => `Routines come to ${RT_NAMES[k] || k} in a later release. This release: ${RT_NAMES.emails}, ${RT_NAMES.fin} and ${RT_NAMES.sales}.`;
   const deptRoutines = k => routines.filter(r => r.dept === k);
   const agentRoutines = id => routines.filter(r => r.agent === id);
   const nextOf = list => list.filter(r => !r.paused && r.nextAt).sort((a, b) => a.nextAt - b.nextAt)[0];
@@ -773,7 +772,7 @@ export function initTasks(ctx) {
       .sort((a, b) => b.changedAt - a.changedAt).slice(0, 60);
     const before = structural ? {} : rects();
     P_.rows.innerHTML = filter === 'sched'
-      ? ((scopedRoutines().sort(byNext).map(rowHTMLr).join('') + scoped().filter(t => t.state === 'scheduled').sort((a, b) => a.dueAt - b.dueAt).map(rowHTMLp).join('')) || `<div class="tp-empty">No routines yet. Type one with a time in it — "every weekday at 8am, …" — or press REPEAT. Press <b>P</b> for the calendar to schedule a task for a date.${RT_DEPTS.includes(dept) ? '' : ' Routines: Emails, Accounting and Sales this release.'}</div>`)
+      ? ((scopedRoutines().sort(byNext).map(rowHTMLr).join('') + scoped().filter(t => t.state === 'scheduled').sort((a, b) => a.dueAt - b.dueAt).map(rowHTMLp).join('')) || `<div class="tp-empty">No routines yet. Type one with a time in it — "every weekday at 8am, …" — or press REPEAT. Press <b>P</b> for the calendar to schedule a task for a date.${RT_DEPTS.includes(dept) ? '' : ' Routines: ${RT_NAMES.emails}, ${RT_NAMES.fin} and ${RT_NAMES.sales} this release.'}</div>`)
       : (list.map(rowHTMLp).join('') || `<div class="tp-empty">Nothing here right now.</div>`);
     renderNext();
     P_.rows.querySelectorAll('.tp-act button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const row = b.closest('.tp-row'); if (row.dataset.rid) rtAct(row.dataset.rid, b.dataset.act); else if (b.dataset.act === 'cancel') cancelScheduled(tasks.find(t => String(t.id) === row.dataset.id)); else if (b.dataset.act === 'calendar' && calendar) calendar.open(); }));

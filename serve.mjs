@@ -182,7 +182,7 @@ function businessContext(index) {
 // the notes an agent would read for this task: name/word overlap, department MOC first
 function relevantNotes(index, dept, text, n = 4) {
   const words = new Set(String(text).toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3));
-  const mocName = { emails: 'MOC-Emails', sales: 'MOC-Sales', marketing: 'MOC-Marketing', ops: 'MOC-Operations', fin: 'MOC-Finance', delivery: 'MOC-Delivery' }[dept];
+  const mocName = { emails: 'MOC-Profile', sales: 'MOC-Research', marketing: 'MOC-Content', ops: 'MOC-Engagement', fin: 'MOC-Analytics', delivery: 'MOC-Clients' }[dept];
   const scored = [];
   for (const [name, txt] of index) {
     if (['CLAUDE', 'index', 'log'].includes(name)) continue;

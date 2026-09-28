@@ -1,5 +1,5 @@
 {
-  "name": "Northgate Studio",
+  "name": "LinkedIn Studio",
   "brain": "./brain",
   "port": 4520,
   "model": "sonnet",

@@ -323,24 +323,23 @@ const kv = id => KPIS.find(k => k.id === id).val;
 let brainNotes = brain.state.notes;
 const BB_ROWS = profileRows() || {
   emails: [
-    ['EMAILS SENT', () => STATS.emailsSent],
-    ['REPLIES DRAFTED', () => STATS.drafts]],
+    ['PROFILES AUDITED', () => STATS.profilesAudited],
+    ['VOICE PROFILES', () => STATS.voiceProfiles]],
   delivery: [
-    ['REPORTS SENT', () => STATS.reports],
+    ['CLIENT REPORTS', () => STATS.reports],
     ['ON TRACK', () => STATS.onTrack + ' / ' + STATS.projects]],
   sales: [
-    ['CALLS S·A·J', () => STATS.spencer + '·' + STATS.arwin + '·' + STATS.jack],
-    ['NEW MANAGERS', () => STATS.managers],
-    ['AUTO-ONBOARDED', () => STATS.autoOnb]],
+    ['ANGLES FOUND', () => STATS.angles],
+    ['HOOKS STUDIED', () => STATS.hooksStudied]],
   marketing: [
-    ['NEW INSIGHTS', () => STATS.insMkt],
-    ['COST PER USER', () => '$' + Math.round(STATS.cpa)]],
+    ['POSTS DRAFTED', () => STATS.postsDrafted],
+    ['CAROUSELS', () => STATS.carousels]],
   ops: [
-    ['PROPOSALS MADE', () => Math.round(kv('proposals'))],
-    ['NEW INSIGHTS', () => STATS.insOps]],
+    ['COMMENTS DRAFTED', () => STATS.commentsDrafted],
+    ['REPLIES DRAFTED', () => STATS.repliesDrafted]],
   fin: [
-    ['INVOICES ISSUED', () => Math.round(kv('invoices'))],
-    ['BILLS PAID', () => STATS.billsPaid]],
+    ['ENGAGERS PULLED', () => STATS.engagersPulled],
+    ['WARM THREADS', () => STATS.warmThreads]],
   brain: [
     ['NOTES INDEXED', () => brainNotes.toLocaleString('en-NZ')]],
 };
@@ -1038,19 +1037,18 @@ function fireAgentEvent(seedTs) {
     if (ev.kpi) { const k = KPIS.find(x => x.id === ev.kpi.id); if (k) k.val += ev.kpi.n; }
     const d = r.a.dept, roll = Math.random();
     profileTickKpi(d, roll); // INDUSTRY PROFILE: the pod's first number ticks up
-    if (d === 'emails') { if (roll < 0.45) STATS.emailsSent++; else if (roll < 0.7) STATS.drafts++; }
+    if (d === 'emails') { if (roll < 0.45) STATS.profilesAudited++; else if (roll < 0.7) STATS.voiceProfiles++; }
     else if (d === 'delivery' && roll < 0.2) STATS.reports++;
     else if (d === 'sales') {
-      if (roll < 0.4) STATS[rnd(['spencer', 'arwin', 'jack'])]++;
-      else if (roll < 0.5) STATS.autoOnb++;
-      else if (roll < 0.56) STATS.managers++;
+      if (roll < 0.4) STATS.angles++;
+      else if (roll < 0.56) STATS.hooksStudied++;
     }
     else if (d === 'marketing') {
-      if (roll < 0.18) STATS.insMkt++;
-      else if (roll < 0.5) STATS.cpa = Math.max(25, STATS.cpa + (Math.random() - 0.55) * 1.2);
+      if (roll < 0.35) STATS.postsDrafted++;
+      else if (roll < 0.5) STATS.carousels++;
     }
-    else if (d === 'ops' && roll < 0.22) STATS.insOps++;
-    else if (d === 'fin' && roll < 0.3) STATS.billsPaid++;
+    else if (d === 'ops') { if (roll < 0.4) STATS.commentsDrafted++; else if (roll < 0.6) STATS.repliesDrafted++; }
+    else if (d === 'fin') { if (roll < 0.3) STATS.engagersPulled += 3; else if (roll < 0.45) STATS.warmThreads++; }
     if (ev.brain || Math.random() < 0.12) { brainNotes++; brain.read(r.a.id); } // the Brain shows the read
     updateBillboards();
     if (modalOpen === r.a.id && modalTab === 'activity') renderActivity(r.a.id);
@@ -1397,7 +1395,7 @@ resize();
   if (h.get('appr')) requestApproval(h.get('appr') === '1' ? 'apay' : h.get('appr'));
   if (h.get('view') && LAYOUT[h.get('view')]) enterFocus(h.get('view'));
   if (h.get('cam')) setCam(h.get('cam') === '1');
-  if (h.get('dark') === '1' || document.body.classList.contains('dark')) setDark(true);
+  if (h.get('dark') !== '0') setDark(true); // dark by default; #dark=0 forces light, D toggles
   // typing #dark=1 into an OPEN tab is a same-document hash change (no reload) — react to it live
   addEventListener('hashchange', () => { const d = new URLSearchParams(location.hash.slice(1)).get('dark'); if (d === '1') setDark(true); else if (d === '0') setDark(false); });
   if (h.get('board')) { // #board=1 → company board · #board=marketing → that dept's board

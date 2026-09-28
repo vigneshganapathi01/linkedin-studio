@@ -6,10 +6,10 @@ export const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-");
 export const P = {
   first:['Sarah','Mike','Priya','Tom','Aroha','Ben','Chloe','Dev','Emma','Finn','Grace','Hemi','Isla','Jake','Kiri','Liam','Mia','Nikau','Olivia','Pete','Ruby','Sam','Tane','Zoe','Harper','Josh','Nina','Ravi','Sofia','Callum'],
   last:['Walker','Patel','Thompson','Ngata','Chen','Murphy','Kaur','Wilson','Fraser','Hohepa','Brooks','Sharma','Reid','Tui','Marsh','Oduya','King','Parata','Lowe','Baxter'],
-  co:['Harbour City Roofing','Southern Cross Fitness','Kea Logistics','Fern & Field Landscaping','Ridgeline Property Group','BlueWater Marine','Totara Legal','Summit HVAC','GoldCoast Solar','Pounamu Recruitment','Marlborough Wines Direct','UrbanNest Realty','Silver Fern Security','Bay Plumbing Co','Crestline Finance','Mako Digital','Kauri Dental Group','Westhaven Charters','Alpine Freight','Nectar Foods'],
-  plan:['Starter','Growth','Scale','Enterprise'],
-  competitor:['CallForge','RingPilot','Quotient CRM','DialAxis','Velora'],
-  city:['Auckland','Wellington','Christchurch','Sydney','Melbourne','Brisbane','Hamilton','Tauranga','Perth','Dunedin'],
+  co:['Sarah Chen','TechFlow AI','Marcus Reid','Lumina Labs','Priya Nair','NorthPeak SaaS','Dev Patel','Cascade Fintech','Elena Rossi','BrightPath Health','Jordan Blake','Vault Security','Maya Lindqvist','Orbit Analytics','Tom Fraser','Nimbus Cloud','Aisha Khan','Forge Consulting','Ryan Walsh','Meridian AI'],
+  plan:['Starter','Growth','Scale','Agency'],
+  competitor:['Justin Welsh','Lara Acosta','Ghostwriting Co','Creator Hooks','Content Machine'],
+  city:['San Francisco','New York','London','Berlin','Singapore','Toronto','Austin','Amsterdam','Sydney','Dubai'],
 };
 export const rnd = a => a[Math.floor(Math.random()*a.length)];
 export const ri = (a,b) => a + Math.floor(Math.random()*(b-a+1));
@@ -789,7 +789,7 @@ export const V1 = [
   chips:['What did you deliver?','Status of the mockup?','How busy are you?'] },
 
 ];
-export const STATS = { emailsSent:128, drafts:41, reports:9, projects:12, onTrack:11, chats:11, insMkt:3, insOps:5, cpa:41.0, spencer:14, arwin:31, jack:16, managers:5, autoOnb:17, billsPaid:14 };
+export const STATS = { profilesAudited:12, voiceProfiles:8, reports:9, projects:12, onTrack:11, chats:11, angles:47, hooksStudied:18, postsDrafted:34, carousels:9, commentsDrafted:63, repliesDrafted:41, engagersPulled:214, warmThreads:11, postsScheduled:23 };
 export const FILE_GEN = {
   pros: ()=>({ icon:'⛏', name:'outbound-batch-'+clockStr().replace(':','')+'.csv', meta:'verified prospects · handed to the Sales Lead · click to view',
     content:`company,city,headcount,contact,title,mobile,icp_score\n${rnd(P.co)},${rnd(P.city)},${ri(8,60)},${person()},${rnd(['Head of Sales','Sales Manager','GM','Founder'])},verified ✓,${ri(70,94)}\n${rnd(P.co)},${rnd(P.city)},${ri(8,60)},${person()},${rnd(['Sales Manager','Director','Founder'])},verified ✓,${ri(70,94)}\n${rnd(P.co)},${rnd(P.city)},${ri(8,60)},${person()},${rnd(['GM','Head of Sales'])},verified ✓,${ri(70,94)}\n…${ri(24,38)} rows · dupes stripped · existing customers excluded` }),
