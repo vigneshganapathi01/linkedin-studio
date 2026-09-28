@@ -1,0 +1,10 @@
+# Static deploy of the LinkedIn Studio demo (dist/command-centre-v2.html is self-contained).
+# No build step — the file is committed and served as-is.
+[build]
+  publish = "dist"
+  command = ""
+
+[[redirects]]
+  from = "/*"
+  to = "/command-centre-v2.html"
+  status = 200
